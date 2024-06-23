@@ -1,25 +1,63 @@
----
-# Creating Vector DB
-cache:
-  cache_dir: formatted_dataset/arc
-  cache_docs: true
-  cache_chunks: true
-  cache_vector_db: true
+--- # TODO:
+# - Model Generation Config: Temperature, Sampling and etc...
+# - Handling verbosity while batch usage
 
-corpus:
-  split_overlap: 0.1
-  num_retrievals: 30
-  from_file_lines:
-    file_path: ../datasets/arc/ARC_Corpus.txt
-  # from_hf:
-  #   dataset_id: luisespinosa/maec-2020
-  #   split: train
-  #   column: text
+# Vectorizer Config
+cache_dir: maec
+cache_docs: true
+cache_chunks: true
+cache_vector_db: true
 
-embedding_model:
-  hf:
-    model_id: thenlper/gte-small
-    device: cuda
+output_path: maec.json
+
+split_overlap: 0.1
+num_retrievals: 30
+num_selections: 4
+
+# Questions Source
+questions_from_hf: false 
+questions_dataset_id: luisespinosa/maec-2020
+questions_dataset_split: train
+questions_dataset_column: text
+
+questions_from_file_lines: false
+questions_file_lines_path: ''
+
+questions_from_yaml: true
+questions_yaml_list: 
+  - In what sectors is Barcelona playing an important role?
+  - How many hours is BST behind Tehran Time?
+
+
+# Documents Source
+docs_from_hf: true 
+docs_dataset_id: luisespinosa/maec-2020
+docs_dataset_split: train
+docs_dataset_column: text
+
+docs_from_pdf_dir: false  
+docs_pdf_dir_path: pdfs/
+
+docs_from_file_lines: false
+docs_file_lines_path: ../datasets/arc/ARC_Corpus.txt
+
+# Embedding Model Source
+embedding_model_from_hf: true 
+embedding_model_id: thenlper/gte-small
+embedding_model_device: cuda
+embedding_model_max_seq_len: null # if null, derive from model's max_seq_len
+
+# Generator Model Source
+generator_model_from_hf: true
+generator_model_id: microsoft/Phi-3-mini-4k-instruct
+generator_model_trust_remote_code: True
+generator_model_device: cuda
+generator_model_torch_dtype: bf16
+generator_model_max_new_tokens: 1024
+
+# Reranker Model
+reranker_model_from_hf: true
+reranker_model_id: colbert-ir/colbertv2.0
 
 # RAG
 system_prompt: |
@@ -40,14 +78,3 @@ context_prompt: |
   Now here is the question you need to answer.
   {question}
 
-generator_model:
-  hf:
-    model_id: microsoft/Phi-3-mini-4k-instruct
-    trust_remote_code: True
-    device: cuda
-    torch_dtype: bf16
-    max_new_tokens: 1024
-
-reranker:
-  num_selections: 4
-  model_id: colbert-ir/colbertv2.0
