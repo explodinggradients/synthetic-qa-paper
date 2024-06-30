@@ -1,0 +1,80 @@
+--- # TODO:
+# - Model Generation Config: Temperature, Sampling and etc...
+# - Handling verbosity while batch usage
+
+# Vectorizer Config
+cache_dir: maec
+cache_docs: true
+cache_chunks: true
+cache_vector_db: true
+
+output_path: maec.json
+
+split_overlap: 0.1
+num_retrievals: 30
+num_selections: 4
+
+# Questions Source
+questions_from_hf: false 
+questions_dataset_id: luisespinosa/maec-2020
+questions_dataset_split: train
+questions_dataset_column: text
+
+questions_from_file_lines: false
+questions_file_lines_path: ''
+
+questions_from_yaml: true
+questions_yaml_list: 
+  - In what sectors is Barcelona playing an important role?
+  - How many hours is BST behind Tehran Time?
+
+
+# Documents Source
+docs_from_hf: true 
+docs_dataset_id: luisespinosa/maec-2020
+docs_dataset_split: train
+docs_dataset_column: text
+
+docs_from_pdf_dir: false  
+docs_pdf_dir_path: pdfs/
+
+docs_from_file_lines: false
+docs_file_lines_path: ../datasets/arc/ARC_Corpus.txt
+
+# Embedding Model Source
+embedding_model_from_hf: true 
+embedding_model_id: thenlper/gte-small
+embedding_model_device: cuda
+embedding_model_max_seq_len: null # if null, derive from model's max_seq_len
+
+# Generator Model Source
+generator_model_from_hf: true
+generator_model_id: microsoft/Phi-3-mini-4k-instruct
+generator_model_trust_remote_code: True
+generator_model_device: cuda
+generator_model_torch_dtype: bf16
+generator_model_max_new_tokens: 1024
+
+# Reranker Model
+reranker_model_from_hf: true
+reranker_model_id: colbert-ir/colbertv2.0
+
+# RAG
+system_prompt: |
+  Using the information contained in the context, give a comprehensive answer to the question.
+  Respond only to the question asked, response should be concise and relevant to the question.
+  If the answer cannot be deduced from the context, do not generate any response on your own.
+  Place your response only in the following JSON and do not generate anything else:
+  {{
+      "found_the_answer": <true or false>,
+      "actual_response": <Str>,
+      "id_of_relevant_documents": <List(Int)>,
+  }}
+
+context_prompt: |
+  Context:
+  {context}
+  ---
+  Now here is the question you need to answer.
+  {question}
+
