@@ -1,6 +1,5 @@
-import chunk
 from pydantic import BaseModel, field_validator
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Literal
 
 import os
 import importlib
@@ -39,7 +38,7 @@ class ComponentConfig(BaseModel):
                 target_class = getattr(module, class_name)
                 sig = inspect.signature(target_class.__init__)
                 valid_params = sig.parameters.keys()
-                if 'kwargs' in valid_params:
+                if "kwargs" in valid_params:
                     return v
                 for param in v:
                     if param not in valid_params:
@@ -49,6 +48,11 @@ class ComponentConfig(BaseModel):
             except Exception as e:
                 raise ValueError(f"Error validating params for '{class_path}': {e}")
         return v
+
+
+class RetrieverConfig(BaseModel):
+    type: Literal["vanilla", "multi_query"] = "vanilla"
+    params: Dict[str, Any] = {"search_kwargs": {"k": 2}}
 
 
 class Config(BaseModel):
@@ -63,8 +67,8 @@ class Config(BaseModel):
     llm: ComponentConfig = ComponentConfig(
         class_path="langchain_openai.ChatOpenAI", params={"model": "gpt-4o"}
     )
-    retriever: Optional[ComponentConfig] = None
-    
+    retriever: RetrieverConfig = RetrieverConfig()
+
     @field_validator("directory")
     @classmethod
     def validate_directory(cls, v):
