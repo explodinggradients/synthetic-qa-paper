@@ -7,6 +7,9 @@ import logging
 
 
 from rag.config import Config, RetrieverConfig, instantiate_component
+from rag.prompt import RAGInput, RAGPrompt
+from ragas.llms import LangchainLLMWrapper
+from ragas.dataset_schema import EvaluationDataset, SingleTurnSample
 
 
 logger = logging.getLogger(__name__)
@@ -19,7 +22,8 @@ class RAGBuilder:
         llm: BaseLanguageModel,
         text_splitter: TextSplitter,
         embedding_model: Embeddings,
-        retriever: RetrieverConfig,
+        retriever_config: RetrieverConfig,
+        prompt: str,
     ) -> None:
         self._directory = directory
         self.llm = llm
@@ -27,8 +31,11 @@ class RAGBuilder:
         self._embedding_model = embedding_model
 
         self.db = self.build_index()
-        self._retriever = retriever
+        self._retriever = None
+        self._retriever_config = retriever_config
 
+        self._prompt = RAGPrompt()
+        self._prompt.instruction = prompt
 
     def build_index(self):
         documents = self.load_documents(self._directory)
@@ -63,24 +70,27 @@ class RAGBuilder:
         return documents
 
     @property
-    def retriever(self):
-        return self._retriever
+    def retriever_config(self):
+        return self._retriever_config
 
-    @retriever.setter
-    def retriever(self, retriever):
+    @retriever_config.setter
+    def retriever_config(self, retriever_config):
         assert (
             self.db is not None
         ), "Index must be built before retriever can be loaded."
 
-        if self.retriever == "vanilla":
-            self._retriever = self.db.as_retriever(**retriever.params)
+        params = retriever_config.params
+        name = retriever_config.type
+        if name == "vanilla":
+            self._retriever = self.db.as_retriever(**params)
 
-        elif self.retriever == "multi_query":
+        elif name == "multi_query":
             from langchain.retrievers.multi_query import MultiQueryRetriever
 
             self._retriever = MultiQueryRetriever.from_llm(
-                retriever=self.db.as_retriever(**retriever.params), llm=self.llm
+                retriever=self.db.as_retriever(**params), llm=self.llm
             )
+        self._retriever_config = retriever_config
 
     @classmethod
     def from_config(cls, config: Config):
@@ -104,5 +114,20 @@ class RAGBuilder:
             llm=llm,
             text_splitter=text_splitter,
             embedding_model=embedding_model,
-            retriever=config.retriever,
+            retriever_config=config.retriever,
+            prompt=config.model_prompt,
         )
+
+    async def invoke(self, dataset: EvaluationDataset):
+        assert self._retriever is not None, "Retriever must be set before invoking."
+        llm = LangchainLLMWrapper(self.llm)
+
+        for sample in dataset:
+            documents = self._retriever.invoke(sample.user_input)
+            context = [document.page_content for document in documents]
+            prompt_input = RAGInput(query=sample.user_input, context="\n".join(context))
+            response = await self._prompt.generate(data=prompt_input, llm=llm)
+            sample.retrieved_context = context
+            sample.response = response
+
+        return dataset

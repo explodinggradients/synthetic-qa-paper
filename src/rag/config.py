@@ -68,6 +68,7 @@ class Config(BaseModel):
         class_path="langchain_openai.ChatOpenAI", params={"model": "gpt-4o"}
     )
     retriever: RetrieverConfig = RetrieverConfig()
+    model_prompt: str = "Answer the user query based on the context"
 
     @field_validator("directory")
     @classmethod
