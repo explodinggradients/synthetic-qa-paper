@@ -7,8 +7,8 @@ from langchain_community.vectorstores import FAISS
 import logging
 
 
-from rag.config import Config, instantiate_component
-from rag.prompt import RAGInput, RAGPrompt
+from ragbench.config import Config, instantiate_component
+from ragbench.prompt import RAGInput, RAGPrompt
 from ragas.llms import LangchainLLMWrapper
 from ragas.dataset_schema import EvaluationDataset
 from ragas import evaluate
