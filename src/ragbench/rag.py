@@ -165,5 +165,7 @@ class RAGBuilder:
     ):
         dataset = await self.invoke(dataset)
         results = evaluate(dataset, metrics=metrics, llm=eval_llm, **kwargs)
-        results.to_pandas().to_csv(os.path.join(RESULTS_PATH, self.config.experiment_name, "results.csv"))
+        results.to_pandas().to_csv(
+            os.path.join(RESULTS_PATH, self.config.experiment_name, "results.csv")
+        )
         return results
