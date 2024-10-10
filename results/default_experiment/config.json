@@ -1,0 +1,36 @@
+{
+    "directory": {
+        "name": "../datasets/Sample_Docs_Markdown/",
+        "params": {
+            "sample_size": 1,
+            "show_progress": true
+        }
+    },
+    "experiment_name": "default_experiment",
+    "text_splitter": {
+        "class_path": "langchain_text_splitters.RecursiveCharacterTextSplitter",
+        "params": {
+            "chunk_size": 512,
+            "chunk_overlap": 100
+        }
+    },
+    "embedding_model": {
+        "class_path": "langchain_openai.OpenAIEmbeddings",
+        "params": {}
+    },
+    "llm": {
+        "class_path": "langchain_openai.ChatOpenAI",
+        "params": {
+            "model": "gpt-4o"
+        }
+    },
+    "retriever": {
+        "type": "vanilla",
+        "params": {
+            "search_kwargs": {
+                "k": 2
+            }
+        }
+    },
+    "model_prompt": "Answer the user query based on the context"
+}
