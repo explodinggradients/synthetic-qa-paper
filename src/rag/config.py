@@ -1,5 +1,6 @@
 from pydantic import BaseModel, field_validator
-from typing import Dict, Any, Optional, Literal
+from typing import Dict, Any, Optional, Literal, List
+import json
 
 import os
 import importlib
@@ -55,8 +56,14 @@ class RetrieverConfig(BaseModel):
     params: Dict[str, Any] = {"search_kwargs": {"k": 2}}
 
 
+class DirectoryConfig(BaseModel):
+    name: str
+    params: Dict[str, Any] = {"sample_size": 1, "show_progress": True}
+
+
 class Config(BaseModel):
-    directory: str
+    directory: DirectoryConfig
+    experiment_name: str = "default_experiment"
     text_splitter: ComponentConfig = ComponentConfig(
         class_path="langchain_text_splitters.RecursiveCharacterTextSplitter",
         params={"chunk_size": 512, "chunk_overlap": 100},
@@ -76,9 +83,18 @@ class Config(BaseModel):
         """
         Validates that the directory exists.
         """
-        if not os.path.exists(v):
-            raise ValueError(f"Directory '{v}' does not exist.")
+        if not os.path.exists(v.name):
+            raise ValueError(f"Directory '{v.name}' does not exist.")
         return v
+
+    @classmethod
+    def load(cls, config_name_or_path: str):
+        config = json.load(open(config_name_or_path))
+        return cls(**config)
+
+    def save(self, path: str):
+        with open(path, "w") as f:
+            json.dump(self.model_dump(), f, indent=4)
 
 
 def instantiate_component(component_config: ComponentConfig):
