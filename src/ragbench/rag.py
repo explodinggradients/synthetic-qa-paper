@@ -66,6 +66,12 @@ class RAGBuilder:
         if not os.path.exists(self.config.experiment_name):
             os.makedirs(self.config.experiment_name)
 
+        if not os.path.exists(VECTOR_STORE_PATH):
+            os.makedirs(VECTOR_STORE_PATH)
+
+        if not os.path.exists(RESULTS_PATH):
+            os.makedirs(RESULTS_PATH)
+
         self.config.save(os.path.join(self.config.experiment_name, "config.json"))
 
     @classmethod
