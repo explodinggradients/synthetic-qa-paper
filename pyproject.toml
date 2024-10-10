@@ -1,0 +1,42 @@
+# pyproject.toml
+
+[project]
+name = "ragbench"
+version = "0.1.0"
+description = "A short description of your package"
+readme = "README.md"
+requires-python = ">=3.6"
+license = {text = "MIT"}
+authors = [
+  {name = "Ikka", email = "shahul@explodinggradients.com"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy>=1.19.0",
+    "requests>=2.25.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.venv
+  | _build
+  | build
+  | dist
+  | pyproject\.toml  # Exclude pyproject.toml
+  | .*\.pyc          # Exclude compiled Python files
+    # Add other files or patterns to exclude
+)/
+'''
