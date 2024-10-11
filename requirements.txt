@@ -1,0 +1,8 @@
+torch
+transformers
+datasets
+langchain
+langchain-community
+langchain-huggingface
+ragatouille
+accelerate
