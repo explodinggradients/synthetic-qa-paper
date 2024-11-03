@@ -1,0 +1,42 @@
+--- # TODO:
+# - Reranker is fairly easy to implement, this will remove dependancies (ragatouille, colbert, ninja and etc.).
+
+cache_dir: ./caches/sample_experiment
+
+dataset_path: ./datasets/multihoprag.json
+results_path: ./results/multihoprag.json
+
+text_splitter_model_id: thenlper/gte-small # only if text_splitter set to [hf_tokenizer, tiktoken]
+embedding_model_id: thenlper/gte-small # HF model id like [BAAI/bge-large-en-v1.5 , BAAI/llm-embedder , ...]
+reranker_model_id: colbert-ir/colbertv2.0 # HF model id, use `null` to turn off reranker
+generator_model_id: gpt-4o-mini # model id in form of HF, OpenAI, TogetherAI
+
+text_splitter: hf_tokenizer # select from [char, recursive_char, hf_tokenizer, tiktoken]
+generator: openai # select from [hf, together, openai]
+
+split_overlap: 0.1 # percentage of overlap
+chunk_size: 256
+num_retrievals: 10 # for the retriever
+num_selections: 4 # for the reranker
+
+api_key: PLACE_YOUR_API_KEY
+
+generator_model_config: # only for HF models
+  max_new_tokens: 256
+  return_full_text: False
+  temperature: 0
+
+## RAG Prompts
+system_prompt: |
+  Using the information contained in the context, give a comprehensive answer to the question.
+  Respond only to the question asked, response should be concise and relevant to the question.
+  If the answer cannot be deduced from the context, do not generate any response on your own and just say `answer not found`.
+
+
+context_prompt: |
+  Context:
+  {CONTEXT}
+  ---
+  Now here is the question you need to answer.
+  {QUERY}
+
